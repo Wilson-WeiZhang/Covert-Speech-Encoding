@@ -4,7 +4,7 @@
 % This script corresponds to Results Section 3.1 and Figure 3 in the manuscript.
 %
 % NOTE: All datasets are publicly available through NTU's data repository:
-%   - Source-localized EEG: https://doi.org/[pending]
+%   - Source-localized EEG: DR-NTU (Data); private peer-review URL is reported in the manuscript
 %
 % Method:
 %   - F-test comparing 5 phrase conditions at each ROI-window pair
@@ -44,7 +44,7 @@ data_path = '/path/to/data/';  % USER: Set your data path
 % Verify path exists
 if ~exist(data_path, 'dir')
     error(['Data path not found: %s\n', ...
-           'Please download data from DOI: [pending] and update data_path.'], ...
+           'Please download the DR-NTU peer-review dataset and update data_path.'], ...
            data_path);
 end
 

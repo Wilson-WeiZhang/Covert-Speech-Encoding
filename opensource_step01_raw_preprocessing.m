@@ -4,7 +4,7 @@
 % This script corresponds to Methods Section 2.2 in the manuscript.
 %
 % NOTE: All datasets are publicly available through NTU's data repository:
-%   - Raw EEG: https://doi.org/[pending]
+%   - Raw EEG: DR-NTU (Data); private peer-review URL is reported in the manuscript
 %
 % Processing steps:
 %   1. Load BrainVision format EEG

@@ -14,10 +14,10 @@
 %   - Delta R^2: Individual contribution beyond group effect
 %
 % Key Results (from manuscript):
-%   - R^2_marginal (Fixed): 0.14%
-%   - Delta R^2 (RI): +6.66%
-%   - Delta R^2 (RS): +11.61%
-%   - Individual/Group ratio: ~131x
+%   - R^2_marginal (Fixed): 0.28%
+%   - Delta R^2 (RI): +7.56%
+%   - Delta R^2 (RS): +9.72%
+%   - Individual/Group ratio: ~62x
 %
 % Author: Wei Zhang
 % Affiliation: Nanyang Technological University

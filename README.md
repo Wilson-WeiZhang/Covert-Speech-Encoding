@@ -2,9 +2,9 @@
 
 This repository contains the analysis code for the research paper:
 
-**Mapping the Spatiotemporal Encoding Signatures of Covert Speech with Source-based EEG-fMRI**
+**Spatiotemporal Encoding Signatures of Covert Speech Revealed by Source-localized EEG and fMRI**
 
-Wei Zhang<sup>1,2</sup>, Muyun Jiang<sup>1</sup>, Kok Ann Colin Teo<sup>2,3,4,5</sup>, Raghavan Bhuvanakantham<sup>2</sup>, Zhiwei Guo<sup>1</sup>, Shuailei Zhang<sup>1</sup>, Chuan Huat Vince Foo<sup>6</sup>, Victoria Leong<sup>7</sup>, Jia Lu<sup>6</sup>, Balazs Gulyas<sup>2,8,9</sup>, & Cuntai Guan<sup>1,10</sup>
+Wei Zhang<sup>1,2</sup>, Muyun Jiang<sup>1</sup>, Kok Ann Colin Teo<sup>2,3,4,5</sup>, Raghavan Bhuvanakantham<sup>2</sup>, Zhiwei Guo<sup>1</sup>, Shuailei Zhang<sup>1</sup>, Chuan Huat Vince Foo<sup>6</sup>, Victoria Leong<sup>7</sup>, Jia Lu<sup>6,8</sup>, Balazs Gulyas<sup>9,10</sup>, & Cuntai Guan<sup>1,11</sup>
 
 <sup>1</sup> College of Computing and Data Science, Nanyang Technological University, Singapore
 <sup>2</sup> Cognitive Neuroimaging Centre, Nanyang Technological University, Singapore
@@ -13,9 +13,10 @@ Wei Zhang<sup>1,2</sup>, Muyun Jiang<sup>1</sup>, Kok Ann Colin Teo<sup>2,3,4,5<
 <sup>5</sup> Division of Neurosurgery, National University Health System, Singapore
 <sup>6</sup> DSO National Laboratories, Singapore
 <sup>7</sup> Early Mental Potential and Wellbeing Research (EMPOWER) Centre, Nanyang Technological University, Singapore
-<sup>8</sup> Hungarian Research Network (HUN-REN), Hungary
-<sup>9</sup> Department of Clinical Neuroscience, Karolinska Institutet, Stockholm, Sweden
-<sup>10</sup> Center for AI in Medicine (C-AIM), Nanyang Technological University, Singapore
+<sup>8</sup> Yong Loo Lin School of Medicine, National University of Singapore, Singapore
+<sup>9</sup> Hungarian Research Network (HUN-REN), Hungary
+<sup>10</sup> Department of Clinical Neuroscience, Karolinska Institutet, Stockholm, Sweden
+<sup>11</sup> Center of AI in Medicine (C-AIM), Nanyang Technological University, Singapore
 
 ## Overview
 
@@ -27,17 +28,17 @@ If you use this code in your research, please cite our paper:
 
 ```
 Zhang, W., Jiang, M., Teo, K.A.C., Bhuvanakantham, R., Guo, Z., Zhang, S., Foo, C.H.V.,
-Leong, V., Lu, J., Gulyas, B., & Guan, C. (2025). Mapping the Spatiotemporal Encoding
-Signatures of Covert Speech with Source-based EEG-fMRI.
+Leong, V., Lu, J., Gulyas, B., & Guan, C. (2026). Spatiotemporal Encoding Signatures
+of Covert Speech Revealed by Source-localized EEG and fMRI. Submitted manuscript.
 ```
 
 ## Data Availability
 
-All datasets have been made publicly available through Nanyang Technological University (NTU)'s data repository (DR-NTU Data https://researchdata.ntu.edu.sg/) and can be accessed according to NTU's open access policy:
+The complete dataset is deposited at DR-NTU (Data), the institutional research data repository of Nanyang Technological University, Singapore. During peer review, the dataset is accessible through the private review URL reported in the manuscript:
 
-1. **Source-localized EEG data**: https://doi.org/[pending] (sLORETA, Destrieux 148 ROIs, N=57)
-2. **Preprocessed EEG data**: https://doi.org/[pending] (EEGLAB format, N=57)
-3. **fMRI contrast maps**: https://doi.org/[pending] (SPM first-level, N=49)
+https://researchdata.ntu.edu.sg/privateurl.xhtml?token=c40b1172-dcd4-48bc-b5cc-287d99ba4120
+
+The public DOI/accession will be updated after journal acceptance or public release. The repository-level source-data workbook contains figure-level numerical data for the main analyses.
 
 This code repository demonstrates the analytical methodology used in our study. The scripts are designed to work with the publicly available data listed above.
 
@@ -106,7 +107,7 @@ This research is supported by DSO National Laboratories, Singapore. We thank the
 
 Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
 
-Copyright (c) 2025 Zhang et al.
+Copyright (c) 2026 Zhang et al.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files, to deal in the material without restriction, including the rights to use, copy, modify, remix, transform, and build upon the material, provided that:
 
