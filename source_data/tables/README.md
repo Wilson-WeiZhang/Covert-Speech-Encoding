@@ -2,7 +2,7 @@
 
 Machine-learning friendly format: **each row = one sample, each column = one feature**
 
-Generated: 2025-01-27
+Generated: 2026-05-20
 
 ---
 
@@ -61,8 +61,8 @@ Generated: 2025-01-27
 **Reproducible results**: R²_fixed=0.28%, Δ_RI=7.56%, Δ_RS=9.72%, ratio=62x
 
 ### Classification Feature Data (Large Files)
-> **Note**: Classification feature matrices (5700 trials × 22200 features) are too large for this repository.
-> Available at: https://github.com/Wilson-WeiZhang/Covert-Speech-Encoding
+> **Note**: Classification feature matrices (5700 trials × 22200 features; 148 ROIs × 150 time points) are too large for this repository.
+> The complete dataset is deposited at DR-NTU (Data) and is available during peer review through the private review URL reported in the manuscript.
 
 ---
 
@@ -82,13 +82,13 @@ Generated: 2025-01-27
 | Stage | Cluster | mean_r | Paper |
 |-------|---------|--------|-------|
 | prep | Left_SM | 0.094 | ✓ matches |
-| prep | Right_SM | 0.079 | ✓ matches |
-| prep | Occipital | 0.031 | ✓ matches |
-| exec | Left_SM | 0.041 | ✓ matches |
+| prep | Right_SM | 0.081 | ✓ matches |
+| prep | Occipital | 0.035 | ✓ matches |
+| exec | Left_SM | 0.055 | ✓ matches |
 | exec | Right_SM | -0.029 | ✓ matches |
 | exec | Occipital | -0.079 | ✓ matches |
 
-> **Note**: p-values from permutation test (1000 iterations) - Prep Left_SM p=0.043*
+> **Note**: p-values from permutation test (1000 iterations) - Prep Left_SM p=0.039*
 
 ---
 

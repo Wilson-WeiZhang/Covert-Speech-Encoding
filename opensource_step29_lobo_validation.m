@@ -4,17 +4,16 @@
 % This script corresponds to Supplementary Section S3 in the manuscript.
 %
 % Method:
-%   - Within each subject: train on 9 blocks, test on 1 held-out block
-%   - 10-fold CV (10 blocks per subject)
+%   - Within each subject: train on all but one covert-speech block, test on the held-out block
+%   - Leave-one-block-out cross-validation across the available covert-speech blocks
 %   - Report per-subject and aggregate accuracy
 %
 % Note: This is the same LOBO method as Step 11, but provides detailed
 % per-block breakdown and statistical validation.
 %
 % Key Parameters:
-%   - Blocks: 10 per subject (alternating O/C)
-%   - Folds: 10 (leave-one-block-out)
-%   - Features: 148 ROIs x 12 windows = 1776
+%   - Blocks: parsed from trial labels after retaining covert-speech trials
+%   - Features: 148 ROIs x 150 time points = 22200
 %
 % Author: Wei Zhang
 % Affiliation: Nanyang Technological University
@@ -40,14 +39,15 @@ baseline_samples = 125;
 num_rois = 148;
 num_words = 5;
 num_blocks = 10;
-num_windows = 12;
-win_ms = 50;
-
-win_starts = baseline_samples + round((0:num_windows-1) * win_ms * fs / 1000) + 1;
-win_ends = baseline_samples + round((1:num_windows) * win_ms * fs / 1000);
+analysis_start_ms = 0;
+analysis_end_ms = 600;
+sample_start = baseline_samples + round(analysis_start_ms * fs / 1000) + 1;
+num_timepoints = round((analysis_end_ms - analysis_start_ms) * fs / 1000);
+sample_end = sample_start + num_timepoints - 1;
 
 fprintf('=== Step 29: LOBO Validation ===\n');
-fprintf('Method: Leave-one-block-out (10-fold CV within subject)\n\n');
+fprintf('Method: Leave-one-block-out within subject\n');
+fprintf('Features: %d ROIs x %d time points = %d\n\n', num_rois, num_timepoints, num_rois * num_timepoints);
 
 %% FIND SUBJECTS
 source_files = dir(fullfile(source_folder, 'Subject*_sLORETA_raw.mat'));
@@ -66,13 +66,15 @@ for s = 1:num_subjects
     % Load data
     data = load(fullfile(source_folder, source_files(s).name));
 
-    valid_idx = ~cellfun(@isempty, data.condition_data);
+    label_text = strtrim(data.condition_data_type);
+    covert_idx = startsWith(label_text, 'C');
+    valid_idx = ~cellfun(@isempty, data.condition_data) & covert_idx;
     condition_data = data.condition_data(valid_idx);
     condition_data_type = data.condition_data_type(valid_idx);
     n_trials = length(condition_data);
 
     % Extract features, labels, and block numbers
-    features = zeros(n_trials, num_rois * num_windows);
+    features = zeros(n_trials, num_rois * num_timepoints);
     labels = zeros(n_trials, 1);
     blocks = zeros(n_trials, 1);
 
@@ -83,12 +85,9 @@ for s = 1:num_subjects
         baseline = mean(trial_data(:, 1:baseline_samples), 2);
         trial_data = trial_data - baseline;
 
-        % Window features
-        feat_vec = zeros(num_rois, num_windows);
-        for w = 1:num_windows
-            feat_vec(:, w) = mean(trial_data(:, win_starts(w):win_ends(w)), 2);
-        end
-        features(t, :) = feat_vec(:)';
+        % Full source time-course features in the preparation window.
+        feat_mat = trial_data(:, sample_start:sample_end);
+        features(t, :) = feat_mat(:)';
 
         % Parse label: 'C 1_u_1_b_3'
         label = condition_data_type{t};

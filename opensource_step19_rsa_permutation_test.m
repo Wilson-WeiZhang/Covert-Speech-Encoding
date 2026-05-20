@@ -9,9 +9,9 @@
 %   - Test significance per cluster
 %
 % Key Results (from manuscript):
-%   - Left Sensorimotor: r = 0.094, p = 0.043*
-%   - Right Sensorimotor: r = 0.079, p = 0.070
-%   - Occipital: r = 0.044, p = 0.190
+%   - Left Sensorimotor: r = 0.094, p = 0.039*
+%   - Right Sensorimotor: r = 0.081, p = 0.064
+%   - Occipital: r = 0.035, p = 0.248
 %
 % Output:
 %   - rsa_results.mat: correlations and p-values per cluster

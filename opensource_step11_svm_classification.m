@@ -4,9 +4,9 @@
 % This script corresponds to Results Section 3.2 and Figure 4a-b in the manuscript.
 %
 % Method:
-%   - Feature: Mean ROI activity per 50ms window (148 ROIs x 12 windows = 1776 features)
+%   - Feature: ROI source activity at each time point (148 ROIs x 150 samples = 22200 features)
 %   - Classifier: Linear SVM (one-vs-all)
-%   - Validation: Leave-one-block-out cross-validation (10 blocks)
+%   - Validation: Leave-one-block-out cross-validation across the available covert-speech blocks
 %   - Window: 0-600ms post-stimulus
 %
 % Key Results (from manuscript):
@@ -41,14 +41,15 @@ num_rois = 148;
 num_words = 5;
 num_blocks = 10;
 
-% Analysis window: 0-600ms (12 x 50ms windows)
-win_ms = 50;
-num_windows = 12;
-win_starts = baseline_samples + round((0:num_windows-1) * win_ms * fs / 1000) + 1;
-win_ends = baseline_samples + round((1:num_windows) * win_ms * fs / 1000);
+% Analysis window: 0-600ms, preserving all time samples.
+analysis_start_ms = 0;
+analysis_end_ms = 600;
+sample_start = baseline_samples + round(analysis_start_ms * fs / 1000) + 1;
+num_timepoints = round((analysis_end_ms - analysis_start_ms) * fs / 1000);
+sample_end = sample_start + num_timepoints - 1;
 
 fprintf('=== Step 11: SVM Classification ===\n');
-fprintf('Features: %d ROIs x %d windows = %d\n', num_rois, num_windows, num_rois * num_windows);
+fprintf('Features: %d ROIs x %d time points = %d\n', num_rois, num_timepoints, num_rois * num_timepoints);
 fprintf('Validation: Leave-one-block-out (%d blocks)\n\n', num_blocks);
 
 %% FIND SUBJECTS
@@ -67,13 +68,15 @@ for s = 1:num_subjects
     % Load data
     data = load(fullfile(source_folder, source_files(s).name));
 
-    valid_idx = ~cellfun(@isempty, data.condition_data);
+    label_text = strtrim(data.condition_data_type);
+    covert_idx = startsWith(label_text, 'C');
+    valid_idx = ~cellfun(@isempty, data.condition_data) & covert_idx;
     condition_data = data.condition_data(valid_idx);
     condition_data_type = data.condition_data_type(valid_idx);
     n_trials = length(condition_data);
 
     % Extract features and labels
-    features = zeros(n_trials, num_rois * num_windows);
+    features = zeros(n_trials, num_rois * num_timepoints);
     labels = zeros(n_trials, 1);
     blocks = zeros(n_trials, 1);
 
@@ -84,12 +87,9 @@ for s = 1:num_subjects
         baseline = mean(trial_data(:, 1:baseline_samples), 2);
         trial_data = trial_data - baseline;
 
-        % Extract window features
-        feat_vec = zeros(num_rois, num_windows);
-        for w = 1:num_windows
-            feat_vec(:, w) = mean(trial_data(:, win_starts(w):win_ends(w)), 2);
-        end
-        features(t, :) = feat_vec(:)';
+        % Extract all source time points in the preparation window.
+        feat_mat = trial_data(:, sample_start:sample_end);
+        features(t, :) = feat_mat(:)';
 
         % Parse label: 'C 1_u_1_b_3'
         label = condition_data_type{t};
@@ -156,6 +156,6 @@ fprintf('t-test vs chance: p = %.4f\n', p_val);
 
 %% SAVE RESULTS
 save(fullfile(output_folder, 'classification_results.mat'), ...
-     'accuracies', 'confusion_all', 'num_subjects', 'num_rois', 'num_windows');
+     'accuracies', 'confusion_all', 'num_subjects', 'num_rois', 'num_timepoints');
 
 fprintf('\n=== Step 11 Complete ===\n');
