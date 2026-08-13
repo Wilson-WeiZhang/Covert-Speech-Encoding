@@ -89,6 +89,15 @@ The analysis consists of 30 sequential steps:
 29. **Step 29**: Leave-one-block-out validation
 30. **Step 30**: Channel-level SVM comparison
 
+## Revision-Stage Analyses
+
+The directory [`revision_analyses/`](revision_analyses/) contains the analyses
+added during peer review: ocular component sets and add-back source
+reconstruction, an empirical permutation-based chance level for the phrase
+classifier, artefact-component decoding, visual-ROI removal, stimulus-attribute
+RSA, the overt-speech arm, and acoustic monitoring. See its
+[README](revision_analyses/README.md) for the module index and configuration.
+
 ## Requirements
 
 The code in this repository requires the following major dependencies:

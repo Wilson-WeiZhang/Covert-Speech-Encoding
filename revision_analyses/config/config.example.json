@@ -1,0 +1,19 @@
+{
+  "data_root": "/path/to/covert-speech-data",
+
+  "eeg_dir": "1utt_1100_final",
+  "raw_overt_dir": "pureeeg",
+  "source_dir": "sourcedata_1100hz_05spre_dest",
+  "source_overt_dir": "sourcedata_1100hz_05spre_dest_overt",
+  "addback_dir_pattern": "sourcedata_1100hz_05spre_%s_dest",
+  "audio_dir": "au/prep2_hil_raw",
+  "brainstorm_protocol": "/path/to/brainstorm/protocol",
+  "audio_raw_dir": "/path/to/continuous-audio-recordings",
+
+  "output_root": "results",
+
+  "eeglab_dir": "/path/to/eeglab2024.2",
+  "brainstorm_dir": "/path/to/brainstorm3",
+
+  "n_workers": 8
+}

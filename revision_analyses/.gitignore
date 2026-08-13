@@ -1,0 +1,11 @@
+config/config.json
+results/
+*.set
+*.fdt
+*.mat
+!10_overt_arm/assets/redmap.mat
+*.bak*
+__pycache__/
+*.pyc
+.DS_Store
+_archive/
