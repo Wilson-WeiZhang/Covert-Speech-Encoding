@@ -105,9 +105,19 @@ def main():
     axb.axhline(0, color="0.4", ls=":", lw=1.0)
     axb.set_xticks([0, 1], ["Overt", "Covert"])
     axb.set_ylabel("0-2 s re baseline (dB)")
+    # Markers follow the one-sided tests reported below.
+    def one_sided_p(v):
+        """One-sided p for an elevation of v above its baseline."""
+        return float(1 - stats.t.cdf(stats.ttest_1samp(v, 0).statistic, v.size - 1))
+
+    def marker(p):
+        return "***" if p < .001 else "**" if p < .01 else "*" if p < .05 else "n.s."
+
+    p_ov, p_cov = one_sided_p(so), one_sided_p(sc)
     top = max(so.max(), sc.max())
-    axb.text(0, top + 3, "***", ha="center", fontsize=13)
-    axb.text(1, top + 3, "n.s.", ha="center", fontsize=11)
+    for i, p in enumerate((p_ov, p_cov)):
+        m = marker(p)
+        axb.text(i, top + 3, m, ha="center", fontsize=13 if m != "n.s." else 11)
     axb.set_ylim(min(so.min(), sc.min()) - 3, top + 7)
     axb.spines[["top", "right"]].set_visible(False)
     axb.text(-0.34, 1.02, "b", transform=axb.transAxes,
@@ -119,10 +129,9 @@ def main():
         fig.savefig(D / f"FigS_covert_acoustic_monitoring.{ext}", dpi=300,
                     bbox_inches="tight")
 
-    p_cov = 1 - stats.t.cdf(stats.ttest_1samp(sc, 0).statistic, n - 1)
     print(f"N = {n}")
-    print(f"  overt  0-2 s {so.mean():+.2f} dB   positive {int((so > 0).sum())}/{n}"
-          f"   min {so.min():+.2f}")
+    print(f"  overt  0-2 s {so.mean():+.2f} dB   one-sided p = {p_ov:.3g}   "
+          f"positive {int((so > 0).sum())}/{n}   min {so.min():+.2f}")
     print(f"  covert 0-2 s {sc.mean():+.2f} dB   one-sided p = {p_cov:.3f}   "
           f">0: {int((sc > 0).sum())}/{n}   max {sc.max():+.2f}")
     print(f"  wrote {D / 'FigS_covert_acoustic_monitoring.png'} (+ .pdf)")

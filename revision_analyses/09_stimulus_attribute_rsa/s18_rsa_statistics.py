@@ -3,8 +3,9 @@
 
 Three properties of this design shape the analysis:
 
-1. WINDOW RANGE. The epochs end at 1496 ms, so the 1400-1500 ms window is a
-   filter edge and is excluded. Windows run from 0 to 1400 ms.
+1. WINDOW RANGE. All fifteen 100 ms windows spanning 0-1500 ms are analysed,
+   matching the window range of the published rmANOVA (Fig. 3, Tables S1-S3).
+   No window is excluded.
 
 2. COLLINEARITY. With only five conditions the attribute RDMs cannot be
    orthogonalised: letter_count and syllables correlate rho = +0.60 across the
@@ -49,7 +50,7 @@ D = cfg.out / "09_stimulus_attribute_rsa"
 # reproduced exactly and verified below against the MATLAB output.
 iu = [(i, j) for j in range(5) for i in range(j)]
 
-EDGE_LIMIT = 1400.0
+EDGE_LIMIT = 1500.0
 
 # ---- neural RDMs ------------------------------------------------------------
 with open(D / "neural_rdm.csv") as fh:
@@ -126,7 +127,7 @@ if dmax > 1e-6:
 say("Stimulus-attribute RSA -- statistics")
 say(f"(pair order verified against the MATLAB output, max diff {dmax:.1e})")
 say(f"N = {n} participants, {len(wins)} windows of {step:.0f} ms over "
-    f"0-{EDGE_LIMIT:.0f} ms (1400-1500 ms dropped: epochs end at 1496 ms)")
+    f"0-{EDGE_LIMIT:.0f} ms")
 say()
 say("COLLINEARITY of the attribute RDMs (Spearman over the 10 phrase pairs):")
 ks = list(ATTR)
@@ -170,6 +171,31 @@ for i, (a, b) in enumerate(wins):
     say("%-12s %9.3f%s %9.3f%s" % (f"{a:.0f}-{b:.0f}", mv, "*" if pv < .05 else " ",
                                    mp, "*" if pp < .05 else " "))
     csv_rows.append((a, b, mv, pv, mp, pp))
+
+
+# ---- BH-FDR across windows --------------------------------------------------
+def bh_fdr(pvals):
+    """Benjamini-Hochberg adjusted p values, the correction used throughout."""
+    m = len(pvals)
+    order = sorted(range(m), key=lambda i: pvals[i])
+    adj = [0.0] * m
+    prev = 1.0
+    for k in range(m - 1, -1, -1):
+        i = order[k]
+        prev = min(prev, pvals[i] * m / (k + 1))
+        adj[i] = min(prev, 1.0)
+    return adj
+
+
+say()
+say("BENJAMINI-HOCHBERG correction across windows:")
+for nm, col in (("VISUAL|PHON", 3), ("PHON/ARTIC|VISUAL", 5)):
+    qs = bh_fdr([r[col] for r in csv_rows])
+    surv = [(wins[i], qs[i]) for i in range(len(wins)) if qs[i] < .05]
+    if surv:
+        say(f"  {nm}: " + "; ".join(f"{a:.0f}-{b:.0f} ms q={v:.4f}" for (a, b), v in surv))
+    else:
+        say(f"  {nm}: no window survives BH-FDR (smallest q = {min(qs):.3f})")
 
 
 # ---- pre-specified 2x2: family x window -------------------------------------

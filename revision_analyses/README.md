@@ -16,15 +16,19 @@ repository section contains the analyses added during revision; the primary anal
 | `05_empirical_chance` | Permutation-based empirical chance level for the phrase classifier | S9 |
 | `06_artefact_decoding` | Phrase decoding from removed artefact components; cohort-level null | S12 |
 | `07_visual_roi_removal` | Phrase classification after removal of visual and occipitotemporal ROIs | S11 |
-| `08_ocular_spatial_control` | Spatial distribution of the ocular add-back effect | S12 |
+| `08_ocular_spatial_control` | Spatial distribution of the ocular add-back effect. Exploratory; not reported in the paper, and its inputs come from the main-pipeline repository rather than from this one | - |
 | `09_stimulus_attribute_rsa` | Representational similarity analysis of stimulus attributes | S10 |
 | `10_overt_arm` | Overt-speech arm: preprocessing, source export, classification, spatiotemporal mapping, muscle/ocular component time courses | S13 |
 | `11_acoustic_monitoring` | Acoustic level monitoring of covert and overt blocks | S14 |
 
 ## Requirements
 
-- MATLAB R2023a or later with EEGLAB 2024.2 and Brainstorm
-- Python 3.12 with `numpy`, `scipy`, `pandas`, `matplotlib`, `h5py`
+- MATLAB R2023a or later, with the Statistics and Machine Learning, Signal
+  Processing, Parallel Computing and Bioinformatics toolboxes (`mafdr`, used for
+  the false-discovery-rate correction in `10_overt_arm`)
+- EEGLAB 2024.2, with the `bva-io` and MARA plugins for the overt preprocessing,
+  and Brainstorm for source reconstruction
+- Python 3.12 with `numpy`, `scipy`, `matplotlib`, `h5py`
 
 ## Configuration
 
@@ -41,6 +45,16 @@ statement of the paper for the data repository.
 Within each module, scripts are numbered in execution order (`sNN_`).
 Cross-module dependencies: `01` before `02`; `02` before `03` and `04`;
 `10_overt_arm/preprocessing` before the other `10_overt_arm` scripts.
+
+Two steps need more than the numbering:
+
+- `01_ocular_component_sets/s01` is run twice. With `AB_BLINK_AP` and
+  `AB_BLINK_FP` unset it makes a diagnostic pass and prints the distribution of
+  the two blink metrics; setting both applies the rule and writes the component
+  sets. The published sets use `AB_BLINK_AP=0.65 AB_BLINK_FP=0`.
+- `10_overt_arm/preprocessing` writes the overt source dataset under `results/`.
+  Point `source_overt_dir` in `config.json` at that directory before running the
+  remaining `10_overt_arm` scripts, which read it as `cfg.source_overt`.
 
 ## License
 

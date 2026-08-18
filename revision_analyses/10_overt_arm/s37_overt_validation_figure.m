@@ -48,8 +48,8 @@ times = Ecov.times(:)';
 EDGE = [-450 1400];
 ok = times >= EDGE(1) & times <= EDGE(2);
 
-[gc, sc, qc] = grp(Ecov.tc_mus);
-[go, so, qo] = grp(Eovt.tc_mus);
+[gc, sc, qc, pc] = grp(Ecov.tc_mus);
+[go, so, qo, po] = grp(Eovt.tc_mus);
 
 % decoding window, drawn first so it sits behind everything
 yl = [-1.6 4.6];
@@ -84,8 +84,8 @@ legend(ax, [ho hc], {'overt','covert'}, 'Box','off', 'Location','northwest', ...
 % Values quoted alongside the figure. The 594 ms sample is the nearest one to
 % the mean speech onset, matching s35_muscle_component_timecourse.m.
 [~, i594] = min(abs(times - 594));
-fprintf('at 594 ms      : overt z=%+.3f q=%.4g | covert z=%+.3f q=%.4g\n', ...
-        go(i594), qo(i594), gc(i594), qc(i594));
+fprintf('at 594 ms      : overt z=%+.3f p=%.4g q=%.4g | covert z=%+.3f p=%.4g q=%.4g\n', ...
+        go(i594), po(i594), qo(i594), gc(i594), pc(i594), qc(i594));
 w = times >= 200 & times <= 400;
 fprintf('200-400 ms mean: overt z=%+.3f  covert z=%+.3f\n', mean(go(w)), mean(gc(w)));
 f = find((qo < 0.05) & post & (go > 0), 1);
@@ -97,7 +97,7 @@ exportgraphics(fig, [fdir 'FigS_overt_block_validation.png'], 'Resolution', 400)
 fprintf('wrote %sFigS_overt_block_validation.png\n', fdir);
 
 %% ---------------- helpers ----------------
-function [g, s, q] = grp(X)
+function [g, s, q, p] = grp(X)
 % Cohort mean, standard error and FDR-corrected q values for a one-sided
 % test of elevation above baseline at each time point.
 v = ~all(isnan(X), 2);
@@ -107,6 +107,7 @@ s = std(X, 0, 1, 'omitnan') ./ sqrt(sum(v));
 [~, p2, ~, st] = ttest(X);
 p1 = p2 / 2;
 p1(st.tstat < 0) = 1 - p1(st.tstat < 0);
+p = p1;
 q = fdrq(p1);
 end
 

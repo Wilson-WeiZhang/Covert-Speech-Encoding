@@ -34,12 +34,9 @@ of Covert Speech Revealed by Source-localized EEG and fMRI. Submitted manuscript
 
 ## Data Availability
 
-The complete dataset is deposited at DR-NTU (Data), the institutional research data repository of Nanyang Technological University, Singapore. During peer review, the dataset is accessible through the private review URL reported in the manuscript:
+The raw EEG, structural MRI and functional MRI recordings are not publicly available because they are data from human participants and the informed consent did not cover unrestricted public release; structural MRI in particular is potentially re-identifiable. De-identified data are available under controlled access to qualified researchers for non-commercial academic research. Requests should be addressed to the corresponding author (Cuntai Guan, ctguan@ntu.edu.sg) and will be answered within four weeks; access requires a data-sharing agreement approved by the Institutional Review Board of Nanyang Technological University that prohibits re-identification and onward redistribution and restricts use to the approved research purpose.
 
-
-The public DOI/accession will be updated after journal acceptance or public release. The repository-level source-data workbook contains figure-level numerical data for the main analyses.
-
-This code repository demonstrates the analytical methodology used in our study. The scripts are designed to work with the publicly available data listed above.
+The numerical source data underlying all main figures are provided with the manuscript as Supplementary Data 1 and in `source_data/`, which allows the main reported results to be reproduced. The scripts in this repository document the analytical methodology and are designed to run on the controlled-access dataset described above.
 
 ## Analysis Pipeline
 

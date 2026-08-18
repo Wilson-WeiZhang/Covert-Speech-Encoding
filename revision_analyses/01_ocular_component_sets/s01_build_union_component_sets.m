@@ -51,6 +51,9 @@
 %  ENV
 %    AB_BLINK_AP  minimum |corr(w, anterior-posterior axis)| for a blink
 %    AB_BLINK_FP  minimum frontopolar weight share for a blink
+%
+%    The component sets reported in the paper were written with
+%    AB_BLINK_AP=0.65 AB_BLINK_FP=0, read off the diagnostic pass.
 % =========================================================================
 
 addpath(fullfile(fileparts(fileparts(mfilename('fullpath'))), 'config'));
