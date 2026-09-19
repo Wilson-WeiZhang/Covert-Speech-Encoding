@@ -19,7 +19,7 @@ repository section contains the analyses added during revision; the primary anal
 | `08_ocular_spatial_control` | Spatial distribution of the ocular add-back effect. Exploratory; not reported in the paper, and its inputs come from the main-pipeline repository rather than from this one | - |
 | `09_stimulus_attribute_rsa` | Representational similarity analysis of stimulus attributes | S10 |
 | `10_overt_arm` | Overt-speech arm: preprocessing, source export, classification, spatiotemporal mapping, muscle/ocular component time courses | S13 |
-| `11_acoustic_monitoring` | Acoustic level monitoring of covert and overt blocks | S14 |
+| `11_acoustic_monitoring` | Acoustic level monitoring of covert and overt blocks, per analysis window | Results, Methods, S14 |
 
 ## Requirements
 
