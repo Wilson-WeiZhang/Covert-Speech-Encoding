@@ -49,7 +49,7 @@ bands.alpha = [8 13];
 bands.beta = [13 30];
 
 band_names = fieldnames(bands);
-filter_order = 4;  % Butterworth order
+filter_order = 4;  % order of the bandpass (butter doubles the order for bandpass designs)
 
 fprintf('=== Step 09: Frequency Band Filtering ===\n');
 
@@ -74,7 +74,7 @@ for b = 1:length(band_names)
     end
 
     % Design Butterworth filter
-    [b_filt, a_filt] = butter(filter_order, freq_range / (fs/2), 'bandpass');
+    [b_filt, a_filt] = butter(filter_order/2, freq_range / (fs/2), 'bandpass');
 
     for s = 1:num_subjects
         fprintf('  Subject %d/%d\n', s, num_subjects);

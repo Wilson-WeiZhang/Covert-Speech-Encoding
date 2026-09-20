@@ -11,6 +11,10 @@
 %   e) dPLI direction pathway
 %   f) Duration-connectivity scatter
 %
+% Panels a, d and e are schematics that illustrate the method and the
+% reported pathway; panels b, c and f are drawn from the saved statistics.
+% Significance markers are taken from the FDR-corrected values loaded here.
+%
 % Author: Wei Zhang
 % Affiliation: Nanyang Technological University
 % License: CC BY-NC 4.0
@@ -41,9 +45,8 @@ fprintf('=== Step 25: Plot Figure 6 ===\n');
 %% FIGURE SETUP
 figure('Position', [50 50 1600 1000]);
 
-%% PANEL A: Method Demo
+%% PANEL A: Method Demo (schematic)
 subplot(2, 3, 1);
-% Schematic of wPLI/dPLI computation
 
 % Generate example signals
 t = 0:0.001:1;
@@ -95,37 +98,54 @@ ylabel('Node Strength');
 title('Figure 6b: ROI 55 Node Strength');
 legend(band_names, 'Location', 'northeast');
 
-% Mark significant result
-text(1, max(bar_data(1,:)) + 0.02, '*', 'FontSize', 20, 'HorizontalAlignment', 'center');
+% Mark the bars whose phrase effect survives FDR correction
+q_roi55 = squeeze(hub_results.q_matrix(roi_idx, :, :));  % bands x periods
+for i = 1:nbars
+    x = (1:ngroups) - groupwidth/2 + (2*i-1) * groupwidth / (2*nbars);
+    for g = 1:ngroups
+        if q_roi55(i, g) < 0.05
+            text(x(g), bar_data(g, i) + errorbar_data(g, i) + 0.01, '*', ...
+                 'FontSize', 20, 'HorizontalAlignment', 'center');
+        end
+    end
+end
 
 %% PANEL C: F-value Ranking
 subplot(2, 3, 3);
 
 F_values = hub_results.F_values;
+q_values = hub_results.q_values;
 [~, sort_idx] = sort(F_values, 'descend');
 
 % Top 20 ROIs
 top_n = 20;
 bar(F_values(sort_idx(1:top_n)), 'FaceColor', [0.3 0.6 0.9]);
+hold on;
 
 xlabel('ROI Rank');
 ylabel('F-value');
 title('Figure 6c: F-value Ranking (Top 20 ROIs)');
 
+% Mark the ROIs whose phrase effect survives FDR correction
+for i = 1:top_n
+    if q_values(sort_idx(i)) < 0.05
+        text(i, F_values(sort_idx(i)) + 0.2, '*', 'FontSize', 16, ...
+             'HorizontalAlignment', 'center');
+    end
+end
+
 % Highlight ROI 55
 roi55_rank = find(sort_idx == 55);
 if roi55_rank <= top_n
-    hold on;
     bar(roi55_rank, F_values(55), 'FaceColor', [0.9 0.3 0.3]);
     text(roi55_rank, F_values(55) + 0.5, 'ROI 55', ...
          'HorizontalAlignment', 'center', 'FontWeight', 'bold');
 end
 
-%% PANEL D: Connectivity Network
+%% PANEL D: Connectivity Network (schematic)
 subplot(2, 3, 4);
 
-% Simplified network visualization
-% Show top connections from ROI 55
+% Strongest connections of ROI 55, arranged on a ring
 
 mean_wpli = squeeze(mean(wpli_all(:, :, :, 1, 1), 1));  % Delta, Plan
 roi55_connections = mean_wpli(55, :);
@@ -153,7 +173,7 @@ text(0, 0.15, 'ROI 55', 'HorizontalAlignment', 'center', 'FontWeight', 'bold');
 axis equal off;
 title('Figure 6d: ROI 55 Connectivity Network');
 
-%% PANEL E: Information Flow Pathway
+%% PANEL E: Information Flow Pathway (schematic)
 subplot(2, 3, 5);
 
 % Arrow diagram: Angular -> Postcentral -> Fusiform
@@ -179,7 +199,7 @@ title('Figure 6e: Information Flow Direction');
 
 % Add note
 text(0.5, 0.2, 'Reversed vs DIVA model', 'HorizontalAlignment', 'center', ...
-     'FontStyle', 'italic', 'Color', [0.5 0.5 0.5]);
+     'FontAngle', 'italic', 'Color', [0.5 0.5 0.5]);
 
 %% PANEL F: Duration Correlation
 subplot(2, 3, 6);
@@ -200,7 +220,7 @@ plot(x_line, polyval(coeffs, x_line), 'r-', 'LineWidth', 2);
 xlabel('Duration (ms)');
 ylabel('Node Strength');
 title(sprintf('Figure 6f: Duration Correlation\n\\rho = %.3f, p = %.4f', ...
-      duration_results.rho, duration_results.p_value));
+      duration_results.mean_rho(1), duration_results.p_rho(1)));
 
 %% SAVE
 saveas(gcf, fullfile(output_folder, 'figure6_connectivity_analysis.png'));

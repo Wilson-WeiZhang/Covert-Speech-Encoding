@@ -1,16 +1,16 @@
 %% opensource_step28_source_reproducibility.m
-% Test source localization reproducibility
-%
-% This script corresponds to Supplementary Section S5 in the manuscript.
+% Split-half reliability of the source-localized phrase activity patterns
 %
 % Method:
-%   - Split-half reliability (odd vs even trials)
-%   - Intraclass Correlation Coefficient (ICC)
-%   - Test-retest across blocks
+%   - Split the trials of each participant into odd- and even-numbered trials
+%   - Average the baseline-corrected activity of each phrase within each half,
+%     for every ROI and every 50 ms window (0-600 ms)
+%   - Correlate the five-phrase profiles of the two halves, per ROI and window
+%   - Apply the Spearman-Brown correction to the split-half correlations
 %
-% Key Results (from manuscript):
-%   - ICC > 0.8 for most significant ROIs
-%   - Split-half reliability: r > 0.9
+% Output:
+%   - reproducibility_results.mat: split-half and Spearman-Brown corrected
+%     correlations per participant, ROI and window
 %
 % Author: Wei Zhang
 % Affiliation: Nanyang Technological University
@@ -82,15 +82,20 @@ for s = 1:num_subjects
         baseline = mean(trial_data(:, 1:baseline_samples), 2);
         trial_data = trial_data - baseline;
 
+        is_odd = ismember(t, odd_trials);
+        if is_odd
+            odd_count(word_id) = odd_count(word_id) + 1;
+        else
+            even_count(word_id) = even_count(word_id) + 1;
+        end
+
         for w = 1:num_windows
             win_mean = mean(trial_data(:, win_starts(w):win_ends(w)), 2);
 
-            if ismember(t, odd_trials)
+            if is_odd
                 odd_activity(word_id, :, w) = squeeze(odd_activity(word_id, :, w)) + win_mean';
-                odd_count(word_id) = odd_count(word_id) + 1;
             else
                 even_activity(word_id, :, w) = squeeze(even_activity(word_id, :, w)) + win_mean';
-                even_count(word_id) = even_count(word_id) + 1;
             end
         end
     end

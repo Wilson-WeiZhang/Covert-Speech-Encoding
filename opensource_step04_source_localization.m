@@ -53,7 +53,7 @@ if ~exist(output_folder, 'dir')
 end
 
 %% PARAMETERS (fixed for reproducibility)
-atlas_name = 'Destrieux';      % Atlas to use (index 3 in Brainstorm)
+atlas_name = 'Destrieux';      % Atlas to use (selected by name, never by position)
 kernel_type = 'sLORETA';       % Source localization method
 trial_start = 1;               % First sample to extract
 trial_end = 500;               % Last sample (2s @ 250Hz)
@@ -81,13 +81,20 @@ parfor subj = 1:num_subjects
     anat_file = fullfile(brainstorm_folder, 'anat', subj_name, 'tess_cortex_pial_low.mat');
     anat_data = load(anat_file, 'Atlas');
 
-    % Find Destrieux atlas (index may vary)
+    % Find the atlas by name. The position of an atlas inside Atlas() varies
+    % between anatomies, so never fall back to a fixed index: a wrong index
+    % silently returns a different parcellation.
     atlas_idx = find(strcmp({anat_data.Atlas.Name}, atlas_name));
-    if isempty(atlas_idx)
-        atlas_idx = 3;  % Default position for Destrieux
+    if ~isscalar(atlas_idx)
+        error('Found %d atlases named %s in %s; expected exactly one.', ...
+              numel(atlas_idx), atlas_name, anat_file);
     end
 
     atlas = anat_data.Atlas(atlas_idx);
+    if numel(atlas.Scouts) ~= num_rois
+        error('Atlas %s in %s has %d scouts; expected %d.', ...
+              atlas_name, anat_file, numel(atlas.Scouts), num_rois);
+    end
 
     % Extract ROI vertex indices and labels
     roiindex = cell(length(atlas.Scouts), 2);

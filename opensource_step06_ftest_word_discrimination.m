@@ -8,7 +8,7 @@
 %
 % Method:
 %   - F-test comparing 5 phrase conditions at each ROI-window pair
-%   - 148 ROIs (Destrieux atlas) × 30 time windows (50ms, 0-1500ms)
+%   - 148 ROIs (Destrieux atlas) x 30 time windows (50ms, 0-1500ms)
 %   - Permutation test (N=1000) for significance
 %   - FDR correction (Benjamini-Hochberg)
 %
@@ -72,7 +72,7 @@ alpha_level = 0.05;            % Significance level
 
 fprintf('=== F-test Word Discrimination Analysis ===\n');
 fprintf('ROIs: %d (Destrieux atlas)\n', num_rois);
-fprintf('Windows: %d × %dms (%d-%dms)\n', num_windows, window_size_ms, ...
+fprintf('Windows: %d x %dms (%d-%dms)\n', num_windows, window_size_ms, ...
         analysis_start_ms, analysis_end_ms);
 fprintf('Permutations: %d\n\n', num_permutations);
 
@@ -89,13 +89,12 @@ end
 fprintf('Found %d subjects\n\n', num_subjects);
 
 % Pre-compute window indices
-window_starts = round(analysis_start_ms * fs / 1000) + baseline_samples;
-window_samples = round(window_size_ms * fs / 1000);
-window_indices = zeros(num_windows, 2);
-for w = 1:num_windows
-    window_indices(w, 1) = window_starts + (w-1) * window_samples + 1;
-    window_indices(w, 2) = window_starts + w * window_samples;
-end
+% 50 ms at 250 Hz is 12.5 samples, so the boundaries are the rounded
+% cumulative offsets from the end of the baseline; window 30 ends at sample 500.
+win_offset = round(analysis_start_ms * fs / 1000) + baseline_samples;
+window_starts = win_offset + round((0:num_windows-1) * window_size_ms * fs / 1000) + 1;
+window_ends   = win_offset + round((1:num_windows) * window_size_ms * fs / 1000);
+window_indices = [window_starts(:), window_ends(:)];
 
 %% COMPUTE F-VALUES
 % -------------------------------------------------------------------------
@@ -124,7 +123,7 @@ for subj = 1:num_subjects
         phrase_labels(t) = str2double(condition_labels{t}(3));
     end
 
-    % Stack trials into 3D matrix: trials × ROIs × time
+    % Stack trials into 3D matrix: trials x ROIs x time
     trial_data = zeros(num_trials, num_rois, size(condition_data{1}, 2));
     for t = 1:num_trials
         trial_data(t, :, :) = condition_data{t};
@@ -157,7 +156,7 @@ fprintf('\n=== Computing Group-Level Statistics ===\n');
 
 % Average F-values across subjects
 F_group_real = mean(F_real, 3);
-F_group_perm = squeeze(mean(F_perm, 3));  % num_rois × num_windows × num_perms
+F_group_perm = squeeze(mean(F_perm, 3));  % num_rois x num_windows x num_perms
 
 % Compute p-values from permutation distribution
 p_values = zeros(num_rois, num_windows);
@@ -169,14 +168,7 @@ for r = 1:num_rois
 end
 
 % FDR correction (Benjamini-Hochberg)
-p_flat = p_values(:);
-[p_sorted, sort_idx] = sort(p_flat);
-m = length(p_flat);
-q_values = zeros(m, 1);
-for i = 1:m
-    q_values(sort_idx(i)) = min(p_sorted(i) * m / i, 1);
-end
-q_values = reshape(q_values, num_rois, num_windows);
+q_values = reshape(bh_fdr(p_values(:)), num_rois, num_windows);
 
 % Count significant pairs
 sig_pairs = sum(q_values(:) < alpha_level);
@@ -194,16 +186,16 @@ save(output_file, 'F_group_real', 'p_values', 'q_values', ...
      'F_real', 'F_perm', 'window_indices', 'num_subjects', ...
      'num_permutations', 'alpha_level', '-v7.3');
 
-fprintf('\n✓ Results saved to: %s\n', output_file);
-fprintf('  Variables: F_group_real [%d×%d], p_values, q_values\n', ...
+fprintf('\nOK Results saved to: %s\n', output_file);
+fprintf('  Variables: F_group_real [%dx%d], p_values, q_values\n', ...
         num_rois, num_windows);
 
 %% HELPER FUNCTION
 % -------------------------------------------------------------------------
 function F = compute_fvalue(activity, labels)
     % One-way ANOVA F-statistic
-    % activity: trials × 1
-    % labels: trials × 1 (group labels 1-5)
+    % activity: trials x 1
+    % labels: trials x 1 (group labels 1-5)
 
     groups = unique(labels);
     k = length(groups);
@@ -238,4 +230,19 @@ function F = compute_fvalue(activity, labels)
     else
         F = (SSB / df_between) / (SSW / df_within);
     end
+end
+
+function q = bh_fdr(p)
+    % Benjamini-Hochberg FDR correction.
+    % p: vector of p-values
+    % q: FDR-adjusted values, returned in the order of the input
+    p = p(:);
+    m = numel(p);
+    [p_sorted, sort_idx] = sort(p, 'ascend');
+    q_sorted = p_sorted * m ./ (1:m)';
+    % Enforce monotonicity: cumulative minimum from the largest rank downwards
+    q_sorted = flipud(cummin(flipud(q_sorted)));
+    q_sorted = min(q_sorted, 1);
+    q = zeros(m, 1);
+    q(sort_idx) = q_sorted;
 end

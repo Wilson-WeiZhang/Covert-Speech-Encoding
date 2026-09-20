@@ -149,15 +149,7 @@ end
 %% FDR CORRECTION (Benjamini-Hochberg)
 fprintf('Applying FDR correction...\n');
 
-p_flat = p_values(:);
-[p_sorted, sort_idx] = sort(p_flat);
-m = length(p_flat);
-q_values = zeros(m, 1);
-
-for i = 1:m
-    q_values(sort_idx(i)) = min(p_sorted(i) * m / i, 1);
-end
-q_values = reshape(q_values, num_rois, num_windows);
+q_values = reshape(bh_fdr(p_values(:)), num_rois, num_windows);
 
 % Count significant pairs
 sig_pairs = sum(q_values(:) < alpha_level);
@@ -175,3 +167,20 @@ save(output_file, 'F_values', 'p_values', 'q_values', 'activity_data', ...
 
 fprintf('\nResults saved to: %s\n', output_file);
 fprintf('=== Step 07 Complete ===\n');
+
+%% HELPER FUNCTION
+
+function q = bh_fdr(p)
+    % Benjamini-Hochberg FDR correction.
+    % p: vector of p-values
+    % q: FDR-adjusted values, returned in the order of the input
+    p = p(:);
+    m = numel(p);
+    [p_sorted, sort_idx] = sort(p, 'ascend');
+    q_sorted = p_sorted * m ./ (1:m)';
+    % Enforce monotonicity: cumulative minimum from the largest rank downwards
+    q_sorted = flipud(cummin(flipud(q_sorted)));
+    q_sorted = min(q_sorted, 1);
+    q = zeros(m, 1);
+    q(sort_idx) = q_sorted;
+end

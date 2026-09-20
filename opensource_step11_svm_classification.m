@@ -8,10 +8,7 @@
 %   - Classifier: Linear SVM (one-vs-all)
 %   - Validation: Leave-one-block-out cross-validation across the available covert-speech blocks
 %   - Window: 0-600ms post-stimulus
-%
-% Key Results (from manuscript):
-%   - Overall accuracy: 27.26% +/- 6.97% (chance = 20%)
-%   - Peak window: 300-400ms
+%   - Chance level: 20% (5 balanced classes)
 %
 % Output:
 %   - classification_results.mat: accuracy per subject, confusion matrix

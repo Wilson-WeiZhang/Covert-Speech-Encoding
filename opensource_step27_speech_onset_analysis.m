@@ -5,13 +5,15 @@
 %
 % Method:
 %   - Load per-subject Hilbert envelope organized by phrase label
+%   - Restrict each trial to the segment containing the first overt utterance
 %   - Detect speech onset/offset per trial via adaptive envelope threshold
-%   - Aggregate per-subject per-phrase means
-%   - Repeated-measures ANOVA (phrase as within-subject factor, 5 levels)
+%   - Pool trials for the grand mean +/- SD of onset and offset latency
+%   - Average trials within subject x phrase and run a repeated-measures ANOVA
+%     with phrase as the within-subject factor (5 levels)
 %
-% Key Results (from manuscript, N = 53):
-%   - Overt speech onset:  594 +/- 171 ms  (rmANOVA across phrases: ns)
-%   - Overt speech offset: 1228 +/- 194 ms (rmANOVA across phrases: p < .001)
+% Cohort:
+%   - S0013 is excluded because it has no structural MRI and therefore lies
+%     outside the source-localized cohort; exclusion is by subject ID.
 %
 % Expected input format (one .mat per subject in audio_folder):
 %   results.trials_by_label.label_0  % [n_trials x n_samples]
@@ -19,7 +21,12 @@
 %   results.trials_by_label.label_2
 %   results.trials_by_label.label_3
 %   results.trials_by_label.label_4
-% Envelope sampling rate assumed 48 kHz over a 1.5 s window post-cue.
+% Envelopes are sampled at 48 kHz and span the whole trial; the first overt
+% utterance occupies 2.0-3.5 s after trial onset.
+%
+% Output:
+%   - speech_timing_results.mat: per-trial detections, subject x phrase means,
+%     grand means and the repeated-measures ANOVA statistics
 %
 % Author: Wei Zhang
 % Affiliation: Nanyang Technological University
@@ -41,23 +48,32 @@ end
 
 %% PARAMETERS
 fs = 48000;                     % Envelope sampling rate (Hz)
-analysis_window_s = [0 1.5];    % Seconds post-cue
-window_samples = round(analysis_window_s * fs);
+analysis_window_s = [2 3.5];    % Segment of the first overt utterance (s)
+window_samples = analysis_window_s * fs;
 n_phrases = 5;
+excluded_subjects = {'S0013'};  % No structural MRI
 
 fprintf('=== Step 27: Speech Onset Analysis (Figure 2a) ===\n');
 
 %% FIND SUBJECT FILES
 audio_files = dir(fullfile(audio_folder, 'S*_envelope.mat'));
+
+keep_file = true(length(audio_files), 1);
+for s = 1:length(audio_files)
+    subject_id = audio_files(s).name(1:end-13);   % strip '_envelope.mat'
+    keep_file(s) = ~ismember(subject_id, excluded_subjects);
+end
+audio_files = audio_files(keep_file);
+
 num_subjects = length(audio_files);
-fprintf('Found %d subjects\n\n', num_subjects);
+fprintf('Found %d subjects after exclusion\n\n', num_subjects);
 
 %% PER-TRIAL ONSET/OFFSET DETECTION
 onset_results = struct([]);   % subject, label, trial, onset_sample, offset_sample
 
 for s = 1:num_subjects
     subject_file = audio_files(s).name;
-    subject_id = subject_file(1:end-13);   % strip '_envelope.mat'
+    subject_id = subject_file(1:end-13);
     fprintf('Subject %d/%d: %s\n', s, num_subjects, subject_id);
 
     data = load(fullfile(audio_folder, subject_file));
@@ -132,11 +148,10 @@ for subj_idx = 1:n_subj
 end
 
 %% rmANOVA (phrase as within-subject factor)
-% Listwise deletion: require balanced design (all 5 phrases per subject)
 complete_onset  = all(~isnan(onset_matrix), 2);
 complete_offset = all(~isnan(offset_matrix), 2);
 
-within_design = table(categorical((1:n_phrases)'), 'VariableNames', {'Phrase'});
+within_design = table((1:n_phrases)', 'VariableNames', {'Phrase'});
 
 % Onset
 t_onset = array2table(onset_matrix(complete_onset, :), ...
@@ -147,6 +162,7 @@ F_onset   = ranova_onset.F(1);
 p_onset   = ranova_onset.pValue(1);
 df1_onset = ranova_onset.DF(1);
 df2_onset = ranova_onset.DF(2);
+eta2_onset = ranova_onset.SumSq(1) / (ranova_onset.SumSq(1) + ranova_onset.SumSq(2));
 
 % Offset
 t_offset = array2table(offset_matrix(complete_offset, :), ...
@@ -157,23 +173,31 @@ F_offset   = ranova_offset.F(1);
 p_offset   = ranova_offset.pValue(1);
 df1_offset = ranova_offset.DF(1);
 df2_offset = ranova_offset.DF(2);
+eta2_offset = ranova_offset.SumSq(1) / (ranova_offset.SumSq(1) + ranova_offset.SumSq(2));
 
 fprintf('\n=== rmANOVA (phrase as within-subject factor) ===\n');
-fprintf('Onset  rmANOVA: F(%d,%d) = %.3f, p = %.6f (N = %d subjects)\n', ...
-        df1_onset, df2_onset, F_onset, p_onset, sum(complete_onset));
-fprintf('Offset rmANOVA: F(%d,%d) = %.3f, p = %.6f (N = %d subjects)\n', ...
-        df1_offset, df2_offset, F_offset, p_offset, sum(complete_offset));
+fprintf('Onset  rmANOVA: F(%d,%d) = %.2f, p = %.6f, partial eta2 = %.3f (N = %d subjects)\n', ...
+        df1_onset, df2_onset, F_onset, p_onset, eta2_onset, sum(complete_onset));
+fprintf('Offset rmANOVA: F(%d,%d) = %.2f, p = %.6f, partial eta2 = %.3f (N = %d subjects)\n', ...
+        df1_offset, df2_offset, F_offset, p_offset, eta2_offset, sum(complete_offset));
 
 %% SAVE
 speech_timing = struct();
+speech_timing.onset_results = onset_results;
 speech_timing.onset_matrix  = onset_matrix;
 speech_timing.offset_matrix = offset_matrix;
 speech_timing.unique_subjects = unique_subjects;
+speech_timing.grand_mean = struct( ...
+    'onset_ms',  mean(onset_ms_all),  'onset_sd',  std(onset_ms_all), ...
+    'offset_ms', mean(offset_ms_all), 'offset_sd', std(offset_ms_all), ...
+    'n_onset_trials', length(onset_ms_all), 'n_offset_trials', length(offset_ms_all));
 speech_timing.rmanova.onset  = struct('F', F_onset,  'p', p_onset,  ...
                                        'df1', df1_onset,  'df2', df2_onset, ...
+                                       'eta2_partial', eta2_onset, ...
                                        'n', sum(complete_onset));
 speech_timing.rmanova.offset = struct('F', F_offset, 'p', p_offset, ...
                                        'df1', df1_offset, 'df2', df2_offset, ...
+                                       'eta2_partial', eta2_offset, ...
                                        'n', sum(complete_offset));
 
 save(fullfile(output_folder, 'speech_timing_results.mat'), 'speech_timing');

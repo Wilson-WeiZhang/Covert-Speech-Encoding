@@ -6,11 +6,8 @@
 % Method:
 %   - Same classification pipeline as Step 11
 %   - Use channel data instead of source-localized data
-%   - Compare accuracy: channel vs source
-%
-% Key Results (from manuscript):
-%   - Source-level > Channel-level accuracy
-%   - Demonstrates value of source localization
+%   - Report the channel-level accuracy for comparison with the source-level
+%     accuracy of Step 11
 %
 % Author: Wei Zhang
 % Affiliation: Nanyang Technological University

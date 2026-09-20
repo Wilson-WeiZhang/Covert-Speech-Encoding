@@ -20,7 +20,7 @@ Wei Zhang<sup>1,2</sup>, Muyun Jiang<sup>1</sup>, Kok Ann Colin Teo<sup>2,3,4,5<
 
 ## Overview
 
-This repository contains the analytical code used to investigate the spatiotemporal neural encoding of covert (inner) speech. The analysis combines source-localized EEG with independent fMRI validation to map phrase-discriminative brain activity and individual variability in neural encoding strategies.
+This repository contains the analytical code used to investigate the spatiotemporal neural encoding of covert (inner) speech. The analysis combines source-localized EEG with fMRI validation, acquired in a separate session in the same cohort, to map phrase-discriminative brain activity and individual variability in neural encoding strategies.
 
 ## Citation
 
@@ -29,22 +29,31 @@ If you use this code in your research, please cite our paper:
 ```
 Zhang, W., Jiang, M., Teo, K.A.C., Bhuvanakantham, R., Guo, Z., Zhang, S., Foo, C.H.V.,
 Leong, V., Lu, J., Gulyas, B., & Guan, C. (2026). Spatiotemporal Encoding Signatures
-of Covert Speech Revealed by Source-localized EEG and fMRI. Submitted manuscript.
+of Covert Speech Revealed by Source-localized EEG and fMRI. In submission.
 ```
+
+An archived copy of this repository is deposited at Zenodo: https://doi.org/10.5281/zenodo.21991202
+(this DOI always resolves to the latest archived version).
 
 ## Data Availability
 
 The raw EEG, structural MRI and functional MRI recordings are not publicly available because they are data from human participants and the informed consent did not cover unrestricted public release; structural MRI in particular is potentially re-identifiable. De-identified data are available under controlled access to qualified researchers for non-commercial academic research. Requests should be addressed to the corresponding author (Cuntai Guan, ctguan@ntu.edu.sg) and will be answered within four weeks; access requires a data-sharing agreement approved by the Institutional Review Board of Nanyang Technological University that prohibits re-identification and onward redistribution and restricts use to the approved research purpose.
 
-The numerical source data underlying all main figures are provided with the manuscript as Supplementary Data 1 and in `source_data/`, which allows the main reported results to be reproduced. The scripts in this repository document the analytical methodology and are designed to run on the controlled-access dataset described above.
+The numerical source data underlying the main figures are provided with the article as Supplementary Data 1; the same workbook is in [`source_data/`](source_data/), with a sheet-by-sheet description in its README. The scripts in this repository document the analytical methodology and are designed to run on the controlled-access dataset described above.
 
 ## Analysis Pipeline
 
-The analysis consists of 30 sequential steps:
+The analysis consists of 30 sequential steps. The `opensource_step` scripts are an explanatory
+version of the pipeline: each step is written as a self-contained, readable script that documents
+the method and the order of operations, with data locations declared at the top of the file.
+They are not the verbatim production scripts, and file handling, parallelisation and plotting are
+reduced to what is needed to follow the method. The numerical values behind every main figure are
+in [`source_data/`](source_data/). The analyses added during peer review, in
+[`revision_analyses/`](revision_analyses/), are the production code and carry their own checks.
 
 ### Preprocessing (Steps 01-03)
 1. **Step 01**: Raw EEG preprocessing (filtering, resampling, epoching)
-2. **Step 02**: ICA decomposition (AMICA algorithm)
+2. **Step 02**: ICA decomposition (EEGLAB `runica`)
 3. **Step 03**: Artifact rejection (ICLabel classification)
 
 ### Source Localization (Steps 04-05)
@@ -98,8 +107,8 @@ RSA, the overt-speech arm, and acoustic monitoring. See its
 ## Requirements
 
 The code in this repository requires the following major dependencies:
-- MATLAB R2024b (https://www.mathworks.com)
-- EEGLAB 2024.2.1 (https://eeglab.org/)
+- MATLAB R2023a or later (https://www.mathworks.com), with the Statistics and Machine Learning and Signal Processing toolboxes
+- EEGLAB 2024.2 (https://eeglab.org/)
 - Brainstorm (https://neuroimage.usc.edu/brainstorm/)
 - FieldTrip (https://www.fieldtriptoolbox.org/)
 - SPM12 (https://www.fil.ion.ucl.ac.uk/spm/software/spm12/)
@@ -114,7 +123,7 @@ Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
 
 Copyright (c) 2026 Zhang et al.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files, to deal in the material without restriction, including the rights to use, copy, modify, remix, transform, and build upon the material, provided that:
+You are free to share and adapt the material for non-commercial purposes under the following terms:
 
 Attribution — You must give appropriate credit, provide a link to the license, and indicate if changes were made.
 
